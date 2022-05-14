@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>DTO на стероидах</title>
+    <title>Проектирование распределенного приложения на PHP и kubernetes</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="shower/themes/rndphp/styles/styles.css">
@@ -10,624 +10,474 @@
 <section class="slide preview">
     <div class="lines"></div>
     <div class="stripes"></div>
-    <h1>DTO на стероидах</h1>
-    <p>Владимир Плахотников</p>
+    <h1>Проектирование распределенного приложения на PHP и kubernetes</h1>
+    <p>Иван Поддубный</p>
 </section>
 
 <section class="slide">
-    <h2>Классика - сервис для метода API</h2>
-    <div class="next">
-        <pre class="php" style="font-family:monospace; font-size: 20px;"><span
-            style="color: #000000; font-weight: bold;">public</span> <span
-            style="color: #000000; font-weight: bold;">function</span> process<span
-            style="color: #009900;">&#40;</span><span style="color: #000088;">$params</span><span
-            style="color: #009900;">&#41;</span> <span style="color: #009900;">&#123;</span>
-   <span class="next"><span style="color: #000088;">$result</span> <span
-       style="color: #339933;">=</span> OrderProvider<span
-       style="color: #339933;">::</span><span style="color: #004000;">find</span><span
-       style="color: #009900;">&#40;</span><span style="color: #000088;">$params</span><span
-       style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></span>
-
-   <span class="next"><span style="color: #b1b100;">if</span> <span style="color: #009900;">&#40;</span><span
-       style="color: #000088;">$params</span><span style="color: #009900;">&#91;</span><span
-       style="color: #0000ff;">'deliveryType'</span><span style="color: #009900;">&#93;</span><span
-       style="color: #009900;">&#41;</span> <span style="color: #009900;">&#123;</span>
-       <span style="color: #000088;">$result</span><span style="color: #009900;">&#91;</span><span
-           style="color: #0000ff;">'type'</span><span style="color: #009900;">&#93;</span> <span
-           style="color: #339933;">=</span> <span style="color: #0000ff;">'manually'</span><span
-           style="color: #339933;">;</span>
-   <span style="color: #009900;">&#125;</span></span>
-   <span class="next" style="color: #666666; font-style: italic;">// бизнес-магия</span>
-   <span class="next"><span style="color: #b1b100;">return</span> <span
-       style="color: #000088;">$result</span><span style="color: #339933;">;</span>
-<span style="color: #009900;">&#125;</span></span>
-   </pre>
-    </div>
-</section>
-
-<section class="slide">
-    <h2>Внедряем DTO в контроллер</h2>
-    <div class="next">
-        <pre class="php" style="font-family:monospace; font-size: 20px;"><span
-            style="color: #000088;">$input</span> <span
-            style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">new</span> <mark>OrderProcessInput</mark><span
-            style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span
-            style="color: #339933;">;</span>
-&nbsp;
-<span style="color: #000088;">$input</span><span style="color: #339933;">-&gt;</span><span
-                style="color: #004000;">id</span> <span
-                style="color: #339933;">=</span> Yii<span style="color: #339933;">::</span><span
-                style="color: #000088;">$app</span><span style="color: #339933;">-&gt;</span><span
-                style="color: #004000;">request</span><span style="color: #339933;">-&gt;</span><span
-                style="color: #004000;">get</span><span style="color: #009900;">&#40;</span><span
-                style="color: #0000ff;">'id'</span><span style="color: #009900;">&#41;</span><span
-                style="color: #339933;">;</span></pre>
-    </div>
-
-    <div class="next">
-        <pre class="php" style="font-family:monospace; font-size: 20px;">
-
-<span style="color: #666666; font-style: italic;">// присвоение других полей и их валидация</span>
-
-<span style="color: #000088;">$output</span> <span style="color: #339933;">=</span> OrderService<span
-            style="color: #339933;">::</span><span style="color: #004000;">process</span><span
-            style="color: #009900;">&#40;</span><span style="color: #000088;">$input</span><span
-            style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
-&nbsp;
-<span style="color: #666666; font-style: italic;">// ... превращаем $output в нужный формат </span></pre>
-    </div>
-</section>
-
-<section class="slide">
-    <h2>Внедряем DTO в сервис</h2>
-    <pre class="php next" style="font-family:monospace;"><span
-        style="color: #000000; font-weight: bold;">public</span> <span
-        style="color: #000000; font-weight: bold;">function</span> process<span style="color: #009900;">&#40;</span><mark>OrderProcessInput</mark> <span
-        style="color: #000088;">$input</span><span style="color: #009900;">&#41;</span> <span
-        style="color: #009900;">&#123;</span>
-    </pre>
-
-    <pre class="php next" style="font-family:monospace;"><span style="color: #000088;">$result </span><span
-        style="color: #339933;">=</span> OrderProvider<span
-        style="color: #339933;">::</span><span style="color: #004000;">find</span><span
-        style="color: #009900;">&#40;</span><span
-        style="color: #000088;">$input</span><span style="color: #339933;">-&gt;</span><span
-        style="color: #004000;">orderId</span><span style="color: #009900;">&#41;</span><span
-        style="color: #339933;">;</span>
-    </pre>
-
-    <pre class="php next" style="font-family:monospace;"><span style="color: #000088;">$output</span> <span
-        style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">new</span> <mark>OrderProcessOutput</mark><span
-        style="color: #009900;">&#40;</span><span style="color: #009933; font-style: italic;">/** заполняем данными **/</span><span
-        style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
-    </pre>
-
-    <pre class="php next" style="font-family:monospace;"><span style="color: #b1b100;">if</span> <span
-        style="color: #009900;">&#40;</span><span style="color: #000088;">$input</span><span
-        style="color: #339933;">-&gt;</span><span style="color: #004000;">deliveryType</span><span
-        style="color: #009900;">&#41;</span> <span style="color: #009900;">&#123;</span>
-    <span style="color: #000088;"><mark>$output</mark></span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">type</span> <span
-            style="color: #339933;">=</span> <span style="color: #0000ff;">'manually'</span><span
-            style="color: #339933;">;</span>
-<span style="color: #009900;">&#125;</span></pre>
-
-    <pre class="php next" style="font-family:monospace;"><span style="color: #b1b100;">return</span> <span
-        style="color: #000088;"><mark>$output</mark></span><span style="color: #339933;">;</span></pre>
-
-</section>
-
-<section class="slide">
-    <h2>Генерация get/set-методов</h2>
-
-    <div class="columns three" style="grid-column-gap: 45px;">
-        <div class="next">
-            <pre class="php" style="font-family:monospace;"><span
-                style="color: #000000; font-weight: bold;">class</span> ManyFieldsDTO
-<span style="color: #009900;">&#123;</span>
-    <span style="color: #000000; font-weight: bold;">private</span> <span style="color: #000088;">$field1</span><span
-                    style="color: #339933;">;</span>
-&nbsp;
-    <span style="color: #000000; font-weight: bold;">private</span> <span style="color: #000088;">$field2</span><span
-                    style="color: #339933;">;</span>
-&nbsp;
-    <span style="color: #666666; font-style: italic;">// ...</span>
-&nbsp;
-    <span style="color: #000000; font-weight: bold;">private</span> <span style="color: #000088;">$fieldN</span><span
-                    style="color: #339933;">;</span>
-<span style="color: #009900;">&#125;</span></pre>
-        </div>
-        <div class="next">
-            <mark>PhpStorm:</mark>
-            <div>
-                Code > <br/>
-                Generate... > <br/>
-                Getters and Setters... > <br/>
-                OK > <br/>
-                Profit!<br/>
-            </div>
-        </div>
-        <div class="next">
-            <pre class="php" style="font-family:monospace; font-size: 14px;"><span
-                style="color: #009933; font-style: italic;">/**
- * @return mixed
- */</span>
-<span style="color: #000000; font-weight: bold;">public</span> <span
-                    style="color: #000000; font-weight: bold;">function</span> getField1<span
-                    style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span>
-<span style="color: #009900;">&#123;</span>
-    <span style="color: #b1b100;">return</span> <span style="color: #000088;">$this</span><span style="color: #339933;">-&gt;</span><span
-                    style="color: #004000;">field1</span><span style="color: #339933;">;</span>
-<span style="color: #009900;">&#125;</span>
-&nbsp;
-<span style="color: #009933; font-style: italic;">/**
- * @param mixed $field1
- */</span>
-<span style="color: #000000; font-weight: bold;">public</span> <span
-                    style="color: #000000; font-weight: bold;">function</span> setField1<span
-                    style="color: #009900;">&#40;</span><span style="color: #000088;">$field1</span><span
-                    style="color: #009900;">&#41;</span>
-<span style="color: #009900;">&#123;</span>
-    <span style="color: #000088;">$this</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">field1</span> <span
-                    style="color: #339933;">=</span> <span style="color: #000088;">$field1</span><span
-                    style="color: #339933;">;</span>
-<span style="color: #009900;">&#125;</span></pre>
-        </div>
-    </div>
-</section>
-
-<section class="slide">
-    <h2>Стало лучше, но ...</h2>
+    <h2><span>Кто я</span></h2>
     <ol>
-        <li class="next">Инициализировать много полей - сложно</li>
-        <li class="next">Превращать в json/xml/массив - сложно</li>
-        <li class="next">Валидировать - сложно, как и массив</li>
-        <li class="next">Я + array = ❤️ forever️</li>
+        <li>10+ лет в вебе. Прошел путь fullstack, teamlead.</li>
+        <li>Пишу на PHP (Laravel/Bitrix), Typescript, Nodejs</li>
+        <li>Влюблен в Linux, OpenSource, React.</li>
+        <li>Работаю CTO в Вебпрактик <span><i>(отдел разработки 50+ человек)</i></span></li>
+        <li>Один из организаторов Ростовского PHP сообщества</li>
+    </ol>
+    <img class="cover" src="pictures/bg.png" alt="">
+</section>
+
+<section class="slide clear">
+    <h2><span>В Вебпрактик мы пишем сервисы для корпораций</span></h2>
+    <img style="margin-top: 50px;" class="cover" src="pictures/clients.png" alt="">
+</section>
+
+<section class="slide clear">
+    <img class="cover"  style="margin-top: -30px;" src="pictures/techno-logos.png" alt="">
+</section>
+
+
+<section class="slide">
+    <h2><span>О чем доклад</span></h2>
+    <ul>
+        <li>Формата 30 минут не хватит, чтобы познакомить вас полноценно с кубером</li>
+        <li>Мы поговорим о том зачем он, и какие предпосылки</li>
+        <li>Расскажу вам кейс как мы первый раз внедрядли кубер для заказчика пару лет назад</li>
+    </ul>
+
+    <p>Я попробую вас убедить что kubernetes + PHP = ❤. Это не сложно и незаменимо в наше время при строительстве не только сложных систем, но и облегчает работу с средними проектами.</p>
+</section>
+
+
+<section class="slide">
+    <h2><span>Docker</span></h2>
+    <ul>
+        <li>Кто использует docker у себя локально для рабочего окружения?</li>
+        <li class="next">Кто использует docker в production?</li>
+    </ul>
+</section>
+
+
+<section class="slide">
+    <h2><span>Капитанский слайд: для чего нужен docker?</span></h2>
+    <ul>
+        <li>Мы не зависим от дистрибутива ОС</li>
+        <li>Мы не зависим от версий ПО на серверах</li>
+        <li>Мы можем легко масштабироваться</li>
+        <li>На production точная копия версий ПО как и на локальной машине разработчика</li>
+        <li>Легко развернуть точную копию production: stage, test, rc и пр</li>
+        <li>Окружение зоопарк: сервисы/микросервисы</li>
+        <li>Или как минимум SSR движок</li>
+    </ul>
+</section>
+
+
+
+<section class="slide">
+    <h2 class="" style="color: #fff; font-size: 60px;"><span>Нельзя просто взять и начать использовать docker в production*</span></h2>
+    <img src="pictures/no-prosto.jpg" class="cover" alt="">
+</section>
+
+
+<section class="slide">
+    <h2><span> Проблемы docker in production:</span></h2>
+    <ul>
+        <li>Деплой без даунтайма (это вам не git pull origin master)</li>
+        <li>Управление портами</li>
+        <li>Мониторинг сложнее</li>
+        <li>Архитектурное внедрение (взаимосвязь сервисов service discovery)</li>
+        <li>Учитывать недоступность node в кластере</li>
+    </ul>
+</section>
+
+
+<section class="slide">
+    <h2 class="shout shrink" style="font-size: 70px; text-align: center;">
+        <span style="">Нормальное управление <br> docker&nbsp;in&nbsp;production  <br>невозможно <br>без оркестратора</span>
+    </h2>
+</section>
+
+
+<section class="slide">
+    <h2><span>Оркестратор дает:</span></h2>
+    <h3>Непрерывный деплой</h3>
+    <p>(поднимает второй контейнер, переключает трафик, тушит первый)</p>
+    <p><i>Это вам не git pull origin master</i></p>
+</section>
+
+
+<section class="slide">
+    <h2><span>Оркестратор дает:</span></h2>
+    <h3>Масштабирование</h3>
+    <p>Скейлим количество контейнеров на необходимые виртуальные/физические машины в т.ч. между дата центрами.</p>
+</section>
+
+<section class="slide">
+    <h2><span>Оркестратор дает:</span></h2>
+    <h3>Отказоустойчивость</h3>
+    <p>Он следит за лимитами контейнеров, не позволяет контейнерам брать больше и поднимает их в случае падения</p>
+</section>
+
+<section class="slide">
+    <h2><span>Оркестратор дает:</span></h2>
+    <h3>Маршрутизация (discovery)</h3>
+    <p> Оркестратор решает вопросы коммуникаций сервисов между друг другом и извне.</p>
+</section>
+
+<section class="slide">
+    <h2><span>Оркестратор дает:</span></h2>
+    <h3>Высокоуровневая абстракция</h3>
+    <p>Мы отвязываемся от уровня физических ресурсов</p>
+</section>
+
+<section class="slide">
+    <h2><span>Оркестратор дает:</span></h2>
+    <h3>ну и конечно управление зоопарком сервисов</h3>
+</section>
+
+
+
+<section class="slide">
+    <h2 class="shout shrink">Kubernetes &mdash; самый популярный в мире оркестратор</h2>
+</section>
+
+<section class="slide">
+    <h2><span>Итак я попытался объяснить зачем нам kuber</span></h2>
+    <ul>
+        <li>Разворачивание кластеров</li>
+        <li>Масштабирование</li>
+        <li>Отказоустойчивость</li>
+        <li>Маршрутизация</li>
+        <li>Высокоуровневая абстракция над физическими ресурсами</li>
+        <li>Cервисы/микросервисы</li>
+    </ul>
+</section>
+
+
+<section class="slide">
+    <h2 class="shout shrink">Первое PHP приложение в kubernetes</h2>
+</section>
+
+
+<section class="slide">
+    <h2><span>Первое PHP приложение в kubernetes</span></h2>
+    <ul>
+        <li>Я дам реальный кейс который был перед нами в прошлом году</li>
+        <li>Мы с вами попробуем спроектировать отказоустойчивое распределенное приложение на PHP</li>
+        <li>Я расскажу вам наши решения и проблемы, и познакомлю с некоторыми нюансами кубера</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="shout shrink">Первое PHP приложение в kubernetes</h2>
+</section>
+
+
+<section class="slide">
+    <h2><span>Вводные</span></h2>
+    <ul>
+        <li>У вас devops'ы, которые умеют в кубер</li>
+        <li>Рассуждаем с позиции разработчика и архитектора приложения</li>
+        <li>У нас нет возможности организовать круглосуточную службу инцденетов, по ночам мы хотим спать.</li>
+    </ul>
+</section>
+
+
+<section class="slide">
+    <h2><span>Требования</span></h2>
+    <ul>
+        <li>Высокие показатели SLA к отказоустойчивости</li>
+        <li>Эффективное использование ресурсов (мы платим за хостинг из суммы контракта)</li>
+        <li>Дополнительно мы должны обеспечить отказоустойчивость на уровне ДЦ</li>
+        <li>Пикообразные нагрузки. Это сайт крупного федерального онайн мероприятия</li>
+        <li>Bitrix</li>
+        <li>Очень сжатые сроки (мы думали 4000, оказалось 5000К часов за 3 месяца)</li>
+    </ul>
+</section>
+
+<section class="slide clear">
+    <img src="pictures/react.png" class="place bottom left" style="height: 100%;" alt="">
+
+    <h2 class="place right center" style="margin-right: 150px;"><span>Наши<br>внутренние<br>требования</span></h2>
+</section>
+
+<section class="slide">
+    <h2><span>Пару слов о проекте</span></h2>
+    <ul>
+        <li>Сервис федерального мероприятия</li>
+        <li>Целевые показатели: 50К пользователей одновременно.</li>
+        <li>Дизайн рисовал Лебедев, мы реализовали логику</li>
+        <li>Проект занял целый ряд престижных наград: золотой сайт, серебрянный лучник, событие года</li>
+    </ul>
+</section>
+
+<section class="slide clear">
+    <h2><span>Как обеспечить отказоустойчивость на уровне ДЦ в России?</span></h2>
+    <ul>
+        <li class="next">Яндекс.Облако</li>
+    </ul>
+</section>
+
+<section class="slide clear">
+    <h2><span>Как заставить наш сервис подниматься в случае если будут отказы во внерабочее время?</span></h2>
+    <ul>
+        <li>Костыли на bash</li>
+        <li>Kubernetes</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2><span>А если упадет сам кубер?</span></h2>
+    <ul>
+        <li>Отказоустойчивость из коробки (3 сервера)</li>
+        <li>Kubernetes as service</li>
+    </ul>
+</section>
+
+<section class="slide clear">
+    <img class="cover" src="pictures/scheme-1.svg" alt="">
+</section>
+
+
+<section class="slide">
+    <h2 class="shout shrink">Поднимаемся на уровень сервисов</h2>
+</section>
+
+
+<section class="slide">
+    <h2 class="">Поднимаемся на уровень сервисов</h2>
+    <ul>
+        <li>PHP-FPM (Монолит)</li>
+        <li>Nextjs</li>
+    </ul>
+</section>
+
+
+<section class="slide clear">
+    <img class="cover" src="pictures/scheme-2.svg" alt="">
+</section>
+
+
+<section class="slide">
+    <h2 class="">Пакуем контейнеры</h2>
+    <p>1. Разработчик должен уметь описать docker контейнер или составить требования для девопс</p>
+    <ul>
+        - Версия ПО
+        - Расширения
+        - Команды
+        - Переменные окружения и cекреты
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="">Готовим к куберу</h2>
+    <ul>
+        <li>Stateless!</li>
+        <li>Отдавать метрики в случае долгоживущих процессов</li>
+        <li>healthchecks, liveness/readness prob</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="">А теперь жара: нюансы с упаковкой битрикса</h2>
+    <ul>
+        <li>Нет начальной миграции</li>
+        <li class="next">Тяжелое ядро с кучей хлама</li>
+        <li class="next">Обновления ядра</li>
+        <li class="next">Не stateless</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="">Решение с упаковкой битрикса</h2>
+    <ul>
+        <li>stateless: у нас он как API сервер + из коробки работает с S3</li>
+        <li>Ядро в отдельную репу</li>
+        <li>Выпиливаем все что связанно с фронтом из ядра</li>
+        <li>Выпиливаем лишние модули которые не будут использоваться на проекте</li>
+        <li>Делаем автомиграцию на основе стартовой базы</li>
+    </ul>
+</section>
+
+
+<section class="slide">
+    <h2 class="">А что делать с обновлениями?</h2>
+    <ul>
+        <li>Ядро под гитом. На stage раскатываем обновление, коммитим ядро, деплоим в контейнер</li>
+        <li>С БД сложнее. В Enterprise вы можете запросить патч через ТП. Как альтернатива - вы можете просто нативными инструментами записать SQL diff обновления.</li>
+    </ul>
+</section>
+
+
+<section class="slide">
+    <h2 class="">А точно ли вам нужен битрикс?</h2>
+    <ul>
+        <li>Он есть в контракте</li>
+        <li>Очень сжатые сроки. Если еще реализовывать кастомную админку - сроки были бы завалены.</li>
+        <li>Есть еще ряд фишек битрикса которые хорошо подошли проекту</li>
+        <li>Вся остальная логика отлично компенсируется laravel (смотрите предыдущий доклад у нас на канале)</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="">Как сделать отказоустойчивую базу данных?</h2>
+    <ul>
+        <li>Master + N slave</li>
+        <li>Cлейвы в разных ДЦ</li>
+        <li>Оркестратор БД - мастер выходит из строя - слейв становится мастером</li>
+        <li class="next"><b>Берем Yandex Managed MySQL - там все из коробки.</b></li>
+    </ul>
+</section>
+
+
+<section class="slide clear">
+    <img class="cover" src="pictures/scheme-3.svg" alt="">
+</section>
+
+
+<section class="slide">
+    <h2 class="">Пригодилось</h2>
+    <ul>
+        <li>В бою реально мастер падал 2 раза и запросы перенаправлялись. Все ок)</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="">Так, а миграции где запускать?</h2>
+    <ul>
+        <li>Job контейнер, который поднимается в рамках CI</li>
+        <li>и запускает всем знакомую команду ./artisan migrate</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="">Кеширование</h2>
+    <ul>
+        <li>Файлы?</li>
+        <li class="next">Redis</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="">А как быть с планировщиком?</h2>
+    <ul>
+        <li>CronJob</li>
+        <li class="next">Планировщик laravel</li>
+        <li class="next">А как сделать его отказоустойчивым? Поднять в 2 ноды?)</li>
+        <li class="next">Блокировка (mutex) на уровне redis</li>
+    </ul>
+</section>
+
+
+<section class="slide">
+    <h2 class="">Так, а redis теперь уже не thirdParty, критический сервис</h2>
+    <ul>
+        <li>Redis cluster (sentinel)</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="">А что делать с тяжелыми задачами?</h2>
+    <ul>
+        <li>В очереди?</li>
+        <li class="next">Laravel умеет в amazon SQS из коробки</li>
+        <li class="next">Yandex queue поддерживает SQS совместимый протокол</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2 class="">Много асинхронной логики.</h2>
+    <ul>
+        <li>Nodejs+socket.io</li>
+        <li>А если несколько нод?</li>
+    </ul>
+
+    @todo картинка схемы
+</section>
+
+<section class="slide">
+    <h2 class="shout shrink">Основы архитектуры спроектировали</h2>
+</section>
+
+<section class="slide">
+    <h2 class="">Дальше ряд работ</h2>
+    <ol>
+        <li>Конфигурируем Kuber</li>
+        <li class="next">Настраиваем GitlabCI для сборки контейнеров</li>
+        <li class="next">Настраиваем автоскейлинг</li>
+        <li class="next">Пушим контейнеры в registry (тоже яндекс)</li>
+        <li class="next">Настраиваем локальное окружение</li>
     </ol>
 </section>
 
 <section class="slide">
-    <h2 class="shout shrink">Вкалываем стероиды</h2>
-</section>
-
-<section class="slide">
-    <h3 class="shout grow">symfony/serializer</h3>
-</section>
-
-<section class="slide">
-    <h2>symfony/serializer - общий принцип</h2>
-    <img src="pictures/SerializerWorkflow.png" width="70%" class="place" style="padding-top: 80px"/>
-</section>
-
-<section class="slide">
-    <h2>symfony/serializer - возможности</h2>
+    <h2 class="">Дальше ряд работ (продолжение)</h2>
     <ol>
-        <li class="next">JSON, XML, YAML и свои форматы</li>
-        <li class="next">Объекты, массивы объектов и вложенные объекты</li>
-        <li class="next">Описание процесса в виде аннотаций/YAML/XML/PHP</li>
-        <li class="next">Собственные (де)нормализаторы</li>
-        <li class="next">Много возможностей, но это не главное</li>
+        <li>Конфигурируем Kuber</li>
+        <li class="next">Разработчики пишут хелзчеки, readness / liveness пробы</li>
+        <li class="next">Подключаем Elastiс + Kibana для логирования</li>
+        <li class="next">Внедряем Sentry как менеджер исключений (фронт и бек)</li>
+        <li class="next">Внедряем prometheus + grafana для мониторинга</li>
+    </ol>
+</section>
+
+
+<section class="slide">
+    <h2 class="">А что с локальным окружением?</h2>
+    <ol>
+        <li>minicube</li>
+        <li>k3s</li>
     </ol>
 </section>
 
 <section class="slide">
-    <h2>symfony/serializer - пример DTO</h2>
-    <div class="columns two">
-        <div class="next">
-        <pre class="php" style="font-family:monospace; font-size: 14px;"><span
-            style="color: #000000; font-weight: bold;">class</span> OrderProcessInput
-<span style="color: #009900;">&#123;</span>
-    <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000088;">$id</span><span
-                style="color: #339933;">;</span>
-&nbsp;
-    <span style="color: #009933; font-style: italic;">/**
-     * @var <mark>Client</mark>
-     */</span>
-    <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000088;">$client</span><span
-                style="color: #339933;">;</span>
-&nbsp;
-    <span style="color: #009933; font-style: italic;">/**
-     * @var <mark>Attribute[]</mark>
-     */</span>
-    <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000088;">$attributes</span><span
-                style="color: #339933;">;</span>
-<span style="color: #009900;">&#125;</span></pre>
-        </div>
-        <div>
-            <div class="next">
-<pre class="php" style="font-family:monospace; font-size: 14px;"><span
-    style="color: #000000; font-weight: bold;">class</span> <mark>Client</mark>
-<span style="color: #009900;">&#123;</span>
-    <span style="color: #000000; font-weight: bold;">private</span> <span style="color: #000088;">$name</span><span
-        style="color: #339933;">;</span>
-&nbsp;
-    <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> getName<span
-        style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span> <span
-        style="color: #009900;">&#123;</span> <span style="color: #b1b100;">return</span> <span
-        style="color: #000088;">$this</span><span style="color: #339933;">-&gt;</span><span style="color: #004000;">name</span><span
-        style="color: #339933;">;</span> <span style="color: #009900;">&#125;</span>
-&nbsp;
-    <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> setName<span
-        style="color: #009900;">&#40;</span><span style="color: #000088;">$name</span><span style="color: #009900;">&#41;</span> <span
-        style="color: #009900;">&#123;</span> <span style="color: #000088;">$this</span><span
-        style="color: #339933;">-&gt;</span><span style="color: #004000;">name</span> <span style="color: #339933;">=</span> <span
-        style="color: #000088;">$name</span><span style="color: #339933;">;</span> <span style="color: #009900;">&#125;</span>
-<span style="color: #009900;">&#125;</span></pre>
-            </div>
-            <div class="next">
-                <pre class="php" style="font-family:monospace; font-size: 14px;"><span
-                    style="color: #000000; font-weight: bold;">class</span> <mark>Attribute</mark>
-<span style="color: #009900;">&#123;</span>
-    <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000088;">$key</span><span
-                        style="color: #339933;">;</span>
-&nbsp;
-    <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000088;">$value</span><span
-                        style="color: #339933;">;</span>
-<span style="color: #009900;">&#125;</span></pre>
-            </div>
-        </div>
-    </div>
-
-</section>
-
-<section class="slide">
-    <h2>symfony/serializer - пример использования</h2>
-    <div class="columns two">
-        <div class="next">
-            <pre class="javascript" style="font-family:monospace;"><span
-                style="color: #009900;">&#123;</span>
-  <span style="color: #33#3366cc&quot;id&quot;</span><span style=" color: #339933;">:</span> <span
-                    style="color: #CC#cc0000123</span><span style=" color: #339933;">,</span>
-                <span style="color: #33#3366cc&quot;client&quot;</span><span style=" color: #339933;">:</span> <span
-                    style="color: #009900;">&#123;</span>
-    <span style="color: #33#3366cc&quot;name&quot;</span><span style=" color: #339933;">:</span> <span
-                    style="color: #33#3366cc&quot;Skyeng&quot;</span><span style=" color: #339933;">,</span>
-                <mark><span style="color: #33#3366cc&quot;unused&quot;</span><span style=" color: #339933;">:</span> <span
-                    style="color: #33#3366cc&quot;field&quot;</span></mark>
-  <span style=" color: #009900;">&#125;</span><span style="color: #339933;">,</span>
-  <span style="color: #33#3366cc&quot;attributes&quot;</span><span style=" color: #339933;">:</span> <span
-                        style="color: #009900;">&#91;</span>
-    <span style="color: #009900;">&#123;</span>
-      <span style="color: #33#3366cc&quot;key&quot;</span><span style=" color: #339933;">:</span> <span
-                        style="color: #33#3366cc&quot;param1&quot;</span><span style=" color: #339933;">,</span>
-                    <span style="color: #33#3366cc&quot;value&quot;</span><span style=" color: #339933;">:</span> <span
-                        style="color: #33#3366cc&quot;value1&quot;</span>
-    <span style=" color: #009900;">&#125;</span>
-                    <span style="color: #009900;">&#93;</span>
-<span style="color: #009900;">&#125;</span></pre>
-        </div>
-        <div>
-            <div class="next">
-                <pre class="php" style="font-family:monospace;"><span style="color: #000088;">$encoders</span> <span
-                    style="color: #339933;">=</span> <span style="color: #009900;">&#91;</span><span
-                    style="color: #000000; font-weight: bold;">new</span> JsonEncoder<span style="color: #009900;">&#40;</span><span
-                    style="color: #009900;">&#41;</span><span style="color: #009900;">&#93;</span><span
-                    style="color: #339933;">;</span>
-<span style="color: #000088;">$normalizers</span> <span style="color: #339933;">=</span> <span style="color: #009900;">&#91;</span><span
-                        style="color: #000000; font-weight: bold;">new</span> ObjectNormalizer<span
-                        style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span
-                        style="color: #009900;">&#93;</span><span style="color: #339933;">;</span>
-<span style="color: #000088;">$serializer</span> <span style="color: #339933;">=</span> <span
-                        style="color: #000000; font-weight: bold;">new</span> Serializer<span
-                        style="color: #009900;">&#40;</span><span style="color: #000088;">$normalizers</span><span
-                        style="color: #339933;">,</span> <span style="color: #000088;">$encoders</span><span
-                        style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
-            </div>
-            <div class="next">
-                <br/>
-                <pre class="php" style="font-family:monospace;"><span style="color: #000088;">$orderProcessInput</span> <span
-                    style="color: #339933;">=</span> <span style="color: #000088;">$serializer</span><span
-                    style="color: #339933;">-&gt;</span><span style="color: #004000;"><mark>deserialize</mark></span><span
-                    style="color: #009900;">&#40;</span>
-    <span style="color: #000088;">$jsonContent</span><span style="color: #339933;">,</span>
-    <mark>OrderProcessInput</mark><span style="color: #339933;">::</span><span
-                        style="color: #000000; font-weight: bold;">class</span><span
-                        style="color: #339933;">,</span>
-    <span style="color: #0000ff;">'json'</span>
-<span style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
-            </div>
-            <div class="next">
-                <br/>
-                <pre class="php" style="font-family:monospace;"><span style="color: #990000;">print_r</span><span
-                    style="color: #009900;">&#40;</span><span style="color: #000088;">$orderProcessInput</span><span
-                    style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="slide">
-    <h2>symfony/serializer - результат десериализации</h2>
-    <div class="columns two">
-        <div>
-            <div class="next">
-                <pre class="javascript" style="font-family:monospace;"><mark>OrderProcessInput</mark> <span
-                    style="">Object</span>
-<span style="color: #009900;">&#40;</span>
-    <span style="color: #009900;">&#91;</span>id<span style="color: #009900;">&#93;</span> <span
-                        style="color: #339933;">=&gt;</span> <span style="color: #CC#cc0000123</span></pre>
-            </div>
-            <div class=" next">
-                <pre class="javascript" style="font-family:monospace;">&nbsp;
-    <span style="color: #009900;">&#91;</span>client<span style="color: #009900;">&#93;</span> <span
-                        style="color: #339933;">=&gt;</span> <mark>Client</mark> <span
-                        style="">Object</span>
-        <span style="color: #009900;">&#40;</span>
-            <span style="color: #009900;">&#91;</span>name<span style="color: #339933;">:</span>Client<span
-                        style="color: #339933;">:</span>private<span style="color: #009900;">&#93;</span> <span
-                        style="color: #339933;">=&gt;</span> Skyeng
-        <span style="color: #009900;">&#41;</span></pre>
-            </div>
-        </div>
-        <div>
-            <div class="next">
-                <br/>
-                <pre class="javascript" style="font-family:monospace;">    <span style="color: #009900;">&#91;</span>attributes<span
-                    style="color: #009900;">&#93;</span> <span style="color: #339933;">=&gt;</span> <span style="">Array</span>
-        <span style="color: #009900;">&#40;</span>
-            <span style="color: #009900;">&#91;</span><span style="color: #CC#cc00000</span><span
-                            style=" color: #009900;">&#93;</span> <span style="color: #339933;">=&gt;</span> <mark>Attribute</mark> <span
-                        style="">Object</span>
-                <span style="color: #009900;">&#40;</span>
-                    <span style="color: #009900;">&#91;</span>key<span style="color: #009900;">&#93;</span> <span
-                        style="color: #339933;">=&gt;</span> param1
-                    <span style="color: #009900;">&#91;</span>value<span style="color: #009900;">&#93;</span> <span
-                        style="color: #339933;">=&gt;</span> value1
-                <span style="color: #009900;">&#41;</span>
-&nbsp;
-        <span style="color: #009900;">&#41;</span></pre>
-            </div>
-        </div>
-
-
-    </div>
-</section>
-
-<section class="slide">
-    <h2>symfony/serializer - (де)нормализация</h2>
-
-    <div class="next">
-        <pre class="php" style="font-family:monospace;"><span style="color: #000088;">$jsonContent</span> <span
-            style="color: #339933;">=</span> <span style="color: #000088;">$serializer</span><span
-            style="color: #339933;">-&gt;</span><span style="color: #990000;"><mark>serialize</mark></span><span
-            style="color: #009900;">&#40;</span><span style="color: #000088;">$orderProcessInput</span><span
-            style="color: #339933;">,</span> <span style="color: #0000ff;">'json'</span><span
-            style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
-    </div>
-    <div class="next">
-        <br/>
-        <pre class="php" style="font-family:monospace;"><span style="color: #000088;">$array</span> <span
-            style="color: #339933;">=</span> <span style="color: #990000;">json_decode</span><span
-            style="color: #009900;">&#40;</span><span style="color: #000088;">$jsonContent</span><span
-            style="color: #339933;">,</span> <span style="color: #009900; font-weight: bold;">true</span><span
-            style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
-    </div>
-    <div class="next">
-        <br/>
-        <pre class="php" style="font-family:monospace;"><span style="color: #000088;">$orderProcessInput</span> <span
-            style="color: #339933;">=</span> <span style="color: #000088;">$serializer</span><span
-            style="color: #339933;">-&gt;</span><span style="color: #004000;"><mark>denormalize</mark></span><span
-            style="color: #009900;">&#40;</span><span style="color: #000088;">$array</span><span
-            style="color: #339933;">,</span> OrderProcessInput<span style="color: #339933;">::</span><span
-            style="color: #000000; font-weight: bold;">class</span><span style="color: #009900;">&#41;</span><span
-            style="color: #339933;">;</span></pre>
-    </div>
-
-    <div class="next">
-        <br/>
-        <pre class="php" style="font-family:monospace;"><span style="color: #000088;">$array</span> <span
-            style="color: #339933;">=</span> <span style="color: #000088;">$serializer</span><span
-            style="color: #339933;">-&gt;</span><span style="color: #004000;"><mark>normalize</mark></span><span
-            style="color: #009900;">&#40;</span><span style="color: #000088;">$orderProcessInput</span><span
-            style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
-    </div>
-</section>
-
-<section class="slide">
-    <h2>symfony/serializer - свой нормалайзер</h2>
-    <div class="next">
-            <pre class="php" style="font-family:monospace;"><span
-                style="color: #000000; font-weight: bold;">class</span> OrderProcessInputNormalizer <span
-                style="color: #000000; font-weight: bold;">implements</span> <mark>NormalizerInterface</mark>
-<span style="color: #009900;">&#123;</span>
-    <span style="color: #000000; font-weight: bold;">private</span> <mark>ObjectNormalizer</mark> <span
-                    style="color: #000088;">$normalizer</span><span
-                    style="color: #339933;">;</span>
-&nbsp;
-    <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> normalize<span
-                    style="color: #009900;">&#40;</span><span style="color: #000088;">$orderProcessInput</span><span
-                    style="color: #339933;">,</span> <span style="color: #000088;">$format</span> <span
-                    style="color: #339933;">=</span> <span
-                    style="color: #009900; font-weight: bold;">null</span><span style="color: #009900;">&#41;</span>
-    <span style="color: #009900;">&#123;</span>
-        <span style="color: #000088;">$data</span> <span style="color: #339933;">=</span> <span style="color: #000088;">$this</span><span
-                    style="color: #339933;">-&gt;</span><span style="color: #004000;">normalizer</span><span
-                    style="color: #339933;">-&gt;</span><span style="color: #004000;"><mark>normalize</mark></span><span
-                    style="color: #009900;">&#40;</span><span style="color: #000088;">$orderProcessInput</span><span
-                    style="color: #339933;">,</span> <span style="color: #000088;">$format</span><span
-                    style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
-&nbsp;
-        <span style="color: #000088;">$data</span><span style="color: #009900;">&#91;</span><span
-                    style="color: #0000ff;">'cached'</span><span style="color: #009900;">&#93;</span> <span
-                    style="color: #339933;">=</span> get_value_from_cache<span
-                    style="color: #009900;">&#40;</span><span style="color: #000088;">$data</span><span
-                    style="color: #009900;">&#91;</span><span style="color: #0000ff;">'id'</span><span
-                    style="color: #009900;">&#93;</span><span style="color: #009900;">&#41;</span><span
-                    style="color: #339933;">;</span>
-&nbsp;
-        <span style="color: #b1b100;">return</span> <span style="color: #000088;">$data</span><span
-                    style="color: #339933;">;</span>
-    <span style="color: #009900;">&#125;</span></pre>
-    </div>
-</section>
-
-<section class="slide">
-    <h2>symfony/serializer - свой нормалайзера</h2>
-    <div class="next">
-            <pre class="php" style="font-family:monospace;"><span
-                style="color: #000000; font-weight: bold;">public</span> <span
-                style="color: #000000; font-weight: bold;">function</span> supportsNormalization<span
-                style="color: #009900;">&#40;</span><span style="color: #000088;">$data</span><span
-                style="color: #339933;">,</span> <span style="color: #000088;">$format</span> <span
-                style="color: #339933;">=</span> <span style="color: #009900; font-weight: bold;">null</span><span
-                style="color: #009900;">&#41;</span>
-<span style="color: #009900;">&#123;</span>
-    <span style="color: #b1b100;">return</span> <span style="color: #000088;">$data</span> instanceof <mark>OrderProcessInput</mark><span
-                    style="color: #339933;">;</span>
-<span style="color: #009900;">&#125;</span></pre>
-    </div>
-
-    <div class="next">
-        <br/>
-        <pre class="php" style="font-family:monospace;"><span style="color: #000088;">$encoders</span> <span
-            style="color: #339933;">=</span> <span style="color: #009900;">&#91;</span><span
-            style="color: #000000; font-weight: bold;">new</span> JsonEncoder<span
-            style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span
-            style="color: #009900;">&#93;</span><span style="color: #339933;">;</span>
-<span style="color: #000088;">$normalizers</span> <span style="color: #339933;">=</span> <span style="color: #009900;">&#91;</span><span
-                style="color: #000000; font-weight: bold;">new</span> ObjectNormalizer<span style="color: #009900;">&#40;</span><span
-                style="color: #009900;">&#41;</span><span style="color: #339933;">,</span> <span
-                style="color: #000000; font-weight: bold;">new</span> <mark>OrderProcessInputNormalizer</mark><span
-                style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span
-                style="color: #009900;">&#93;</span><span style="color: #339933;">;</span>
-<span style="color: #000088;">$serializer</span> <span style="color: #339933;">=</span> <span
-                style="color: #000000; font-weight: bold;">new</span> Serializer<span
-                style="color: #009900;">&#40;</span><span style="color: #000088;">$normalizers</span><span
-                style="color: #339933;">,</span> <span style="color: #000088;">$encoders</span><span
-                style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
-    </div>
-
-    <div class="next">
-        <br/>
-        <pre class="php" style="font-family:monospace;"><span style="color: #000088;">$array</span> <span
-            style="color: #339933;">=</span> <span style="color: #000088;">$serializer</span><span
-            style="color: #339933;">-&gt;</span><span style="color: #004000;"><mark>normalize</mark></span><span
-            style="color: #009900;">&#40;</span><span style="color: #000088;">$orderProcessInput</span><span
-            style="color: #009900;">&#41;</span><span style="color: #339933;">;</span></pre>
-    </div>
-</section>
-
-<section class="slide">
-    <h3 class="shout grow">symfony/validator</h3>
-</section>
-
-<section class="slide">
-    <h2>symfony/validator - возможности</h2>
-
+    <h2 class="">Как прошло?</h2>
     <ol>
-        <li class="next">Единый механизм валидации на вашем проекте</li>
-        <li class="next">Валидация DTO на основе аннотаций/YAML/XML/PHP</li>
-        <li class="next">Генерация списка непройденных правил валидации</li>
-        <li class="next">
-            Много стандартных правил:
-            <ul>
-                <li class="next">Строки: Email, UUID, IP, ...</li>
-                <li class="next">Даты: Date, Datetime, ...</li>
-                <li class="next">Разное: Callback, UniqueEntity, ...</li>
-            </ul>
-        </li>
+        <li>Архитектура выдержала как нагрузочные тесты, так и реальную нагрузку</li>
+        <li>Были конечно баги которые оперативно фиксили - kubernetes позволил выпускать огромное количество релизов раскатывая их таким образом что пользователи не замечали этого.</li>
+        <li>Огромный финансовый профит за счет облака и кубера: мы платили только за потребляемые ресурсы, ради 2х2 дней фестиваля не пришлось арендовать большой парк серверов.</li>
     </ol>
 </section>
 
 <section class="slide">
-    <h2>symfony/validator - пример</h2>
-
-    <div class="next">
-        <pre class="php" style="font-family:monospace;"><span style="color: #000000; font-weight: bold;">class</span> Client
-<span style="color: #009900;">&#123;</span>
-    <span style="color: #009933; font-style: italic;">/**
-     * @Assert\NotBlank
-     * @Assert\Type(&quot;string&quot;)
-     * @<mark>MyCustomAssert</mark>
-     */</span>
-    <span style="color: #000000; font-weight: bold;">private</span> <span style="color: #000088;">$name</span><span
-                style="color: #339933;">;</span>
-&nbsp;
-    <span style="color: #666666; font-style: italic;">// ... get/set</span>
-<span style="color: #009900;">&#125;</span></pre>
-    </div>
+    <h2 class="">Нам понравилось</h2>
+    <ol>
+        <li>Внедрили kubernetes еще нескольким крупным корпорациям</li>
+        <li>Для небольших проектов используем k3s в проде</li>
+    </ol>
 </section>
 
 <section class="slide">
-    <h2>symfony/validator - пример</h2>
+    <h2 class="">С чего вкатиться в kubernetes?</h2>
+    <ol>
+        <li>Kubernetes as a service (yandex/vk/selectel cloud)</li>
+        <li>БЕСПЛАТНЫЙ курс Kubernetes для разработчиков на youtube</li>
+    </ol>
 
-    <div class="columns two">
-        <div class="next">
-        <pre class="php" style="font-family:monospace;"><span style="color: #000088;">$client</span> <span
-            style="color: #339933;">=</span> <span style="color: #000000; font-weight: bold;">new</span> Client<span
-            style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span
-            style="color: #339933;">;</span>
-&nbsp;
-<span style="color: #000088;">$validator</span> <span style="color: #339933;">=</span> Validation<span
-                style="color: #339933;">::</span><span style="color: #004000;">createValidator</span><span
-                style="color: #009900;">&#40;</span><span style="color: #009900;">&#41;</span><span
-                style="color: #339933;">;</span>
-&nbsp;
-<span style="color: #009933; font-style: italic;">/**
-* @var <mark>ConstraintViolationList</mark> $errors
-*/</span>
-<span style="color: #000088;">$errors</span> <span style="color: #339933;">=</span> <span style="color: #000088;">$validator</span><span
-                style="color: #339933;">-&gt;</span><span style="color: #004000;">validate</span><span
-                style="color: #009900;">&#40;</span><span style="color: #000088;">$client</span><span
-                style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
-        </pre>
-        </div>
-        <div class="next">
-            <pre class="php" style="font-family:monospace;"><span style="color: #b1b100;">if</span> <span
-                style="color: #009900;">&#40;</span><span style="color: #990000;">count</span><span
-                style="color: #009900;">&#40;</span><span style="color: #000088;">$errors</span><span
-                style="color: #009900;">&#41;</span> <span style="color: #339933;">&gt;</span> <span
-                style="color: #cc66cc;">0</span><span style="color: #009900;">&#41;</span> <span
-                style="color: #009900;">&#123;</span>
-   <span style="color: #000088;">$errorsString</span> <span style="color: #339933;">=</span> <span
-                    style="color: #009900;">&#40;</span>string<span style="color: #009900;">&#41;</span> <span
-                    style="color: #000088;">$errors</span><span style="color: #339933;">;</span>
-&nbsp;
-   <span style="color: #b1b100;">throw</span> <span style="color: #000000; font-weight: bold;">new</span> Exception<span
-                    style="color: #009900;">&#40;</span><span style="color: #000088;">$errorsString</span><span
-                    style="color: #009900;">&#41;</span><span style="color: #339933;">;</span>
-<span style="color: #009900;">&#125;</span></pre>
-        </div>
-    </div>
-
+    <img src="pictures/slerm.jpg" style="width: 600px;" alt="">
 </section>
 
 <section class="slide">
-    <h2>Живой пример</h2>
-    <div class="place bottom">
-            <pre class="next" style="line-height: 130%">
-     Мобильное                                                       Сервис
-     приложение                        API                          каталога
-+-----------------+            +-----------------+            +-----------------+
-|                 |            |                 |            |                 |
-|     Свежая      |    JSON    |                 |      XML   |     Древняя     |
-|     магия       <------------>     <mark>ʕ ᵔᴥᵔ ʔ</mark>     <------------>      магия      |
-|    (Kotlin)     |            |                 |            |      (Yii)      |
-|                 |            |                 |            |                 |
-+-----------------+            +-----------------+            +-----------------+
-            </pre>
-        <pre>
-
-                <span class="next">MobileRequestDTO +----------> CatalogRequestDTO</span>
-
-                <span class="next">MobileResponseDTO <---------+ CatalogResponseDTO</span>
-
-        </pre>
-    </div>
+    <h2 class="">Полезные ссылки</h2>
+    <ul>
+        <li><a href="https://www.youtube.com/watch?v=WYE9PGJS9ZE">Как мы работаем с kuber локально</a></li>
+        <li><a href="https://www.youtube.com/watch?v=Jx-Us1Hs8-U">Наш доклад про Bitrix + Laravel</a></li>
+        <li><a href="https://southbridge.io/bitrix-k8s">Альтернативный способ варить bitrix in kubernetes</a></li>
+        <li><a href="https://www.youtube.com/playlist?list=PL8D2P0ruohOBSA_CDqJLflJ8FLJNe26K-">БЕСПЛАТНЫЙ курс Kubernetes для разработчиков на youtube</a></li>
+    </ul>
 </section>
 
 <section class="slide">
-    <pre style="line-height: 1; font-size: 19px; font-weight: bold; color: #2e3191; font-family: monospace;"
-         class="place">
- ______  __                                        __
-/\__  _\/\ \                                      /\ \
-\/_/\ \/\ \ \___       __          __     ___     \_\ \
-   \ \ \ \ \  _ `\   /'__`\      /'__`\ /' _ `\   /'_` \
-    \ \ \ \ \ \ \ \ /\  __/     /\  __/ /\ \/\ \ /\ \L\ \
-     \ \_\ \ \_\ \_\\ \____\    \ \____\\ \_\ \_\\ \___,_\
-      \/_/  \/_/\/_/ \/____/     \/____/ \/_/\/_/ \/__,_ /
+    <h2 class="">Спасибо! 🙃</h2>
+    <p>Ваши вопросы</p>
+    Telegram: @northleshiy
 
-    </pre>
+    @todo QR
 </section>
+
+
+
+
+
 
 <div class="progress"></div>
 
